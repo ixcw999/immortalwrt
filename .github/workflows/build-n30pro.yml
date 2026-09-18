@@ -1,0 +1,61 @@
+name: Build N30 Pro (USB VBUS fix)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune --all --force >/dev/null 2>&1 || true
+          df -hT
+
+      - name: Install build dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison \
+            build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler fastjar flex gawk \
+            gettext gcc-multilib g++-multilib git gnutls-dev gperf haveged help2man intltool \
+            lib32gcc-s1 libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev \
+            libncurses-dev libncursesw5-dev libpython3-dev libreadline-dev libssl-dev libtool \
+            libyaml-dev libz-dev lld llvm lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full \
+            patch pkgconf python3-pip python3-ply python3-docutils python3-pyelftools qemu-utils \
+            re2c rsync scons squashfs-tools subversion swig texinfo unzip vim wget xmlto xxd \
+            zlib1g-dev zstd
+
+      - name: Add extra feeds
+        run: |
+          echo 'src-git ken https://github.com/kenzok8/openwrt-packages' >> feeds.conf.default
+          echo 'src-git openclash https://github.com/vernesong/OpenClash.git' >> feeds.conf.default
+
+      - name: Update and install feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Apply build config
+        run: |
+          cp n30pro.seed .config
+          make defconfig
+
+      - name: Download sources
+        run: make download -j$(nproc)
+
+      - name: Compile firmware
+        run: |
+          make -j$(nproc) || make -j1 V=s
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: n30pro-usb-fix
+          path: bin/targets/mediatek/filogic/
+          retention-days: 7
