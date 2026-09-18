@@ -1,0 +1,28 @@
+# Target: Netcore N30 Pro (via netis_nx30v2 device definition)
+CONFIG_TARGET_mediatek=y
+CONFIG_TARGET_mediatek_filogic=y
+CONFIG_TARGET_mediatek_filogic_DEVICE_netis_nx30v2=y
+
+# USB support
+CONFIG_PACKAGE_block-mount=y
+CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-usb3=y
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-extras=y
+CONFIG_PACKAGE_kmod-usb-net=y
+CONFIG_PACKAGE_kmod-usb-net-rndis=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
+
+# LuCI
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-theme-argon=y
+
+# Proxy plugins
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-openclash=y
+CONFIG_PACKAGE_kmod-tun=y
+
+# Misc
+CONFIG_PACKAGE_htop=y
+CONFIG_PACKAGE_openssh-sftp-server=y
