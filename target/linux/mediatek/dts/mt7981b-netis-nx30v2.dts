@@ -1,38 +1,38 @@
-/* SPDX-License-Identifier: (GPL-2.0-only OR MIT) */
-
-/dts-v1/;
-#include "mt7981b-netis-common.dtsi"
-
+/* USB support fix for Netcore N30 Pro / netis NX30 V2:
+ * - add explicit VBUS fixed regulator (GPIO23, active-high, boot-on)
+ * - enable USB PHY (u2port0/u3port0) and xHCI controller
+ * Fixes: USB ports get no 5V VBUS power, devices never enumerate.
+ */
 / {
-	model = "netis NX30 V2";
-	compatible = "netis,nx30v2", "mediatek,mt7981";
-
-	aliases {
-		label-mac-device = &gmac0;
-		led-boot = &led_power;
-		led-failsafe = &led_power;
-		led-running = &led_power;
-		led-upgrade = &led_wps;
+	usb_vbus: regulator-usb {
+		compatible = "regulator-fixed";
+		regulator-name = "usb-vbus";
+		regulator-type = <1>; /* REGULATOR_VOLTAGE */
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		gpios = <&pio 23 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
+		regulator-boot-on;
 	};
+};
 
-	leds {
-		compatible = "gpio-leds";
+&usb_phy {
+	status = "okay";
+};
 
-		led_power: power {
-			color = <LED_COLOR_ID_BLUE>;
-			function = LED_FUNCTION_POWER;
-			gpios = <&pio 4 GPIO_ACTIVE_LOW>;
-			default-state = "on";
-		};
+&u2port0 {
+	status = "okay";
+};
 
-		internet {
-			color = <LED_COLOR_ID_BLUE>;
-			function = LED_FUNCTION_WAN_ONLINE;
-			gpios = <&pio 7 GPIO_ACTIVE_LOW>;
-		};
+&u3port0 {
+	status = "okay";
+};
 
-		led_wps: wps {
-			color = <LED_COLOR_ID_BLUE>;
+&xhci {
+	vbus-supply = <&usb_vbus>;
+	status = "okay";
+};
+OLOR_ID_BLUE>;
 			function = LED_FUNCTION_WPS;
 			gpios = <&pio 5 GPIO_ACTIVE_LOW>;
 		};
@@ -77,3 +77,4 @@
 		};
 	};
 };
+
